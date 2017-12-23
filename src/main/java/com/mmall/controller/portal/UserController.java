@@ -13,6 +13,10 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpSession;
 
+/**
+ * create by Yang chen
+ */
+
 @Controller
 @RequestMapping("/user/")
 public class UserController {
@@ -24,7 +28,7 @@ public class UserController {
      * 用户登录
      * @param username 用户名
      * @param password 密码
-     * @param session session
+     * @param session 当前用户信息
      * @return ServerResponse<User>
      */
     @RequestMapping(value = "login.do",method = RequestMethod.POST)
@@ -40,10 +44,10 @@ public class UserController {
 
     /**
      * 退出登录
-     * @param session
+     * @param session 当前用户信息
      * @return
      */
-    @RequestMapping(value = "logout.do",method = RequestMethod.GET)
+    @RequestMapping(value = "logout.do",method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<String> logout(HttpSession session){
         session.removeAttribute(Const.CURRENT_USER);
@@ -52,7 +56,7 @@ public class UserController {
 
     /**
      * 注册
-     * @param user
+     * @param user 注册用户信息
      * @return
      */
     @RequestMapping(value = "register.do",method = RequestMethod.POST)
@@ -63,8 +67,8 @@ public class UserController {
 
     /**
      * 校验用户名和邮箱
-     * @param str
-     * @param type
+     * @param str 值
+     * @param type 类型，用户名or邮箱
      * @return
      */
     @RequestMapping(value = "checkValid.do",method = RequestMethod.POST)
@@ -75,7 +79,7 @@ public class UserController {
 
     /**
      * 获取用户信息
-     * @param session
+     * @param session 当前用户信息
      * @return
      */
     @RequestMapping(value = "getUserInfo.do",method = RequestMethod.POST)
@@ -90,7 +94,7 @@ public class UserController {
 
     /**
      * 忘记密码获取密保问题
-     * @param username
+     * @param username 当前用户名
      * @return
      */
     @RequestMapping(value = "forgetGetQuestion.do",method = RequestMethod.POST)
@@ -101,9 +105,9 @@ public class UserController {
 
     /**
      * 校验密保答案
-     * @param username
-     * @param question
-     * @param answer
+     * @param username 当前用户名
+     * @param question 密保问题
+     * @param answer 密保答案
      * @return
      */
     @RequestMapping(value = "forgetCheckAnswer.do",method = RequestMethod.POST)
@@ -114,9 +118,9 @@ public class UserController {
 
     /**
      * 重置密码
-     * @param username
-     * @param passwordNew
-     * @param forgetToken
+     * @param username 当前用户名
+     * @param passwordNew 新密码
+     * @param forgetToken 重置密码的token
      * @return
      */
     @RequestMapping(value = "forgetResetPassword.do",method = RequestMethod.POST)
@@ -127,7 +131,7 @@ public class UserController {
 
     /**
      * 登录状态重置密码
-     * @param session
+     * @param session 当前用户信息
      * @return
      */
     @RequestMapping(value = "resetPassword.do",method = RequestMethod.POST)
@@ -142,8 +146,8 @@ public class UserController {
 
     /**
      *
-     * @param session
-     * @param user
+     * @param session 当前用户信息
+     * @param user 更新后用户的信息
      * @return
      */
     @RequestMapping(value = "updateInformation.do",method = RequestMethod.POST)
@@ -159,6 +163,7 @@ public class UserController {
         user.setUsername(currentUser.getUsername());
         ServerResponse<User> response=iUserService.updateInformation(user);
         if(response.isSuccess()){
+            response.getData().setUsername(currentUser.getUsername());
             session.setAttribute(Const.CURRENT_USER,response.getData());
         }
         return response;

@@ -1,6 +1,7 @@
 package com.mmall.service.impl;
 
 import com.mmall.common.Const;
+import com.mmall.common.ResponseCode;
 import com.mmall.common.ServerResponse;
 import com.mmall.common.TokenCache;
 import com.mmall.dao.UserMapper;
@@ -107,7 +108,7 @@ public class UserServiceImpl implements IUserService {
 
     @Override
     public ServerResponse<String> forgetResetPassword(String username, String passwordNew, String forgetToken) {
-        if(StringUtils.isNotBlank(forgetToken)){
+        if(!StringUtils.isNotBlank(forgetToken)){
             return ServerResponse.createByErrorMessage("参数错误,token需要传递");
         }
         ServerResponse validResponse=this.checkValid(username,Const.USERNAME);
@@ -116,7 +117,7 @@ public class UserServiceImpl implements IUserService {
             return ServerResponse.createByErrorMessage("用户不存在");
         }
         String token=TokenCache.getKey(TokenCache.TOKEN_PREFIX+username);
-        if(StringUtils.isNotBlank(token)){
+        if(!StringUtils.isNotBlank(token)){
             return ServerResponse.createByErrorMessage("token过期");
         }
         if(StringUtils.equals(token,forgetToken)){
@@ -136,12 +137,12 @@ public class UserServiceImpl implements IUserService {
         //防止横向越权
         int resultCount=userMapper.checkPassword(MD5Util.MD5EncodeUtf8(passwordOld),user.getId());
         if(0 == resultCount){
-            ServerResponse.createByErrorMessage("旧密码错误");
+            return ServerResponse.createByErrorMessage("旧密码错误");
         }
         user.setPassword(MD5Util.MD5EncodeUtf8(passwordNew));
         int updateCount=userMapper.updateByPrimaryKeySelective(user);
-        if(0 > updateCount){
-            ServerResponse.createBySuccessMessage("密码更新成功");
+        if(updateCount > 0){
+            return ServerResponse.createBySuccessMessage("密码更新成功");
         }
         return ServerResponse.createByErrorMessage("密码更新失败");
     }
@@ -175,5 +176,15 @@ public class UserServiceImpl implements IUserService {
         }
         user.setPassword(StringUtils.EMPTY);
         return ServerResponse.createBySuccess(user);
+    }
+
+    //backend
+
+    @Override
+    public ServerResponse checkAdminRole(User user) {
+        if(null != user && user.getRole() == Const.Role.ROLE_ADMIN){
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError();
     }
 }
